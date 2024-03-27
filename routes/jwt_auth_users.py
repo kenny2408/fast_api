@@ -1,19 +1,21 @@
+### Users API con autorización OAuth2 JWT ###
+
 from datetime import timezone
-from fastapi import APIRouter, HTTPException, Depends, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from jose import JWTError, jwt
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import jwt, JWTError
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-
 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_DURATION = 1
 SECRET = "201d573bd7d1344d3a3bfce1550b69102fd11be3db6d379508b6cccc58ea230b"
 
-
 router = APIRouter(
-    prefix="/jwtauth", tags=["jwtauth"], responses={404: {"message": "Not found"}}
+    prefix="/jwtauth",
+    tags=["jwtauth"],
+    responses={status.HTTP_404_NOT_FOUND: {"message": "Not found"}},
 )
 
 oauth2 = OAuth2PasswordBearer(tokenUrl="login")
@@ -38,14 +40,14 @@ users_db = {
         "full_name": "John Doe",
         "email": "DcUeh@example.com",
         "disabled": False,
-        "password": "$2a$12$OL/XDlpgJaGoybQCsonFf.0TvPSS3WDY5f9q.r5Rgj5qRMG7qBQUO",
+        "password": "$2a$12$B2Gq.Dps1WYf2t57eiIKjO4DXC3IUMUXISJF62bSRiFfqMdOI2Xa6",
     },
     "janedoe": {
         "username": "janedoe",
         "full_name": "Jane Doe",
         "email": "6mUeh@example.com",
         "disabled": True,
-        "password": "$2a$12$pRLUL0XjTkXhXmc6cIWSbOiG0/QGeiitpj6t1AdJtwOmEwGcJM6m.",
+        "password": "$2a$12$SduE7dE.i3/ygwd0Kol8bOFvEABaoOOlC8JsCSr6wpwB4zl5STU4S",
     },
 }
 
@@ -75,7 +77,7 @@ async def auth_user(token: str = Depends(oauth2)):
     except JWTError as e:
         raise exception from e
 
-    return search_user_db(username)
+    return search_user(username)
 
 
 async def current_user(user: User = Depends(auth_user)):
@@ -83,6 +85,7 @@ async def current_user(user: User = Depends(auth_user)):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Inactive user"
         )
+
     return user
 
 
@@ -115,5 +118,5 @@ async def login(form: OAuth2PasswordRequestForm = Depends()):
 
 
 @router.get("/users/me")
-async def read_users_me(user: User = Depends(current_user)):
+async def me(user: User = Depends(current_user)):
     return user
