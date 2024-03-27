@@ -36,3 +36,15 @@
 Documentación con swagger: <http://127.0.0.1:8000/docs>
 
 Documentación con redoc: <http://127.0.0.1:8000/redoc>
+
+---
+
+## JWT
+
+Para instalarlo:
+
+    pip install "python-jose[cryptography]"
+
+Instalar passlib:
+
+    pip install "passlib[bcrypt]"
